@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import { CheckCircle, FileText, List, Save, XCircle, X } from "lucide-react";
-import * as Dialog from '@radix-ui/react-dialog';
+import { CheckCircle, FileText, List, Save, XCircle } from "lucide-react";
 import { JournalForm } from "./components/JournalForm";
 import { useAppStore } from "./store/useAppStore";
 import { Scenario } from "./core/types";
@@ -24,126 +23,132 @@ function App(): JSX.Element {
   }, []);
 
   return (
-    <div className="flex h-screen w-full flex-col bg-background text-foreground">
-      <header className="flex items-center justify-between border-b px-6 py-4">
+    <div className="flex h-screen w-full flex-col bg-background text-foreground overflow-hidden">
+      <header className="flex items-center justify-between border-b px-6 py-4 bg-card z-10 shrink-0">
         <div className="flex items-center gap-2">
           <FileText className="h-6 w-6 text-primary" />
           <h1 className="text-xl font-bold">Kamu Muhasebesi Pratik</h1>
         </div>
-        <div className="flex items-center gap-4">
-          <Dialog.Root>
-            <Dialog.Trigger asChild>
-              <button className="flex items-center gap-2 rounded-md bg-secondary px-4 py-2 text-sm font-medium hover:bg-secondary/80">
-                <List className="h-4 w-4" />
-                Senaryolar
-              </button>
-            </Dialog.Trigger>
-            <Dialog.Portal>
-              <Dialog.Overlay className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
-              <Dialog.Content className="fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg">
-                <div className="flex flex-col space-y-1.5 text-center sm:text-left">
-                  <Dialog.Title className="text-lg font-semibold leading-none tracking-tight">
-                    Senaryo Seçin
-                  </Dialog.Title>
-                  <Dialog.Description className="text-sm text-muted-foreground">
-                    Pratik yapmak istediğiniz senaryoyu seçiniz.
-                  </Dialog.Description>
-                </div>
-                <div className="grid gap-4 py-4">
-                  {scenarios.map((s) => (
-                    <Dialog.Close asChild key={s.id}>
-                      <button
-                        onClick={async () => {
-                          const fullScenario = await window.api.getScenario(s.id);
-                          loadScenario(fullScenario);
-                        }}
-                        className={`flex flex-col items-start gap-2 rounded-lg border p-3 text-left hover:bg-accent transition-colors ${currentScenario?.id === s.id ? 'border-primary bg-primary/5' : ''}`}
-                      >
-                        <div className="flex w-full justify-between items-center">
-                          <span className="font-semibold">{s.title}</span>
-                          <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-secondary text-secondary-foreground">
-                            {s.difficulty.toUpperCase()}
-                          </span>
-                        </div>
-                        <span className="text-sm text-muted-foreground line-clamp-1">{s.description}</span>
-                      </button>
-                    </Dialog.Close>
-                  ))}
-                </div>
-                <Dialog.Close className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
-                  <X className="h-4 w-4" />
-                  <span className="sr-only">Kapat</span>
-                </Dialog.Close>
-              </Dialog.Content>
-            </Dialog.Portal>
-          </Dialog.Root>
-        </div>
       </header>
-      <main className="flex-1 overflow-auto p-6">
-        <div className="mx-auto max-w-4xl rounded-lg border bg-card text-card-foreground shadow-sm">
-          {currentScenario
-            ? (
-              <>
-                <div className="flex flex-col space-y-1.5 p-6 border-b">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-semibold leading-none tracking-tight text-lg">
-                      Örnek Senaryo: {currentScenario.title}
-                    </h3>
-                    <span className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-secondary text-secondary-foreground">
-                      {currentScenario.difficulty.toUpperCase()}
-                    </span>
-                  </div>
-                  <p className="text-sm text-muted-foreground pt-2">
-                    İlgili hesap ve ekonomik kodları kullanarak yevmiye kaydını
-                    oluşturun.
-                  </p>
+      
+      <div className="flex flex-1 overflow-hidden">
+        {/* Left Sidebar - Scenarios */}
+        <aside className="w-80 border-r bg-muted/10 flex flex-col shrink-0">
+          <div className="p-4 border-b bg-muted/20 flex items-center gap-2 font-semibold text-sm text-muted-foreground">
+            <List className="h-4 w-4" />
+            Senaryo Listesi
+          </div>
+          <div className="flex-1 overflow-y-auto p-4 space-y-3">
+            {scenarios.map((s) => (
+              <button
+                key={s.id}
+                onClick={async () => {
+                  const fullScenario = await window.api.getScenario(s.id);
+                  loadScenario(fullScenario);
+                }}
+                className={`flex w-full flex-col items-start gap-2 rounded-lg border p-3 text-left transition-all hover:bg-accent/50 ${
+                  currentScenario?.id === s.id
+                    ? 'border-primary bg-primary/5 shadow-sm ring-1 ring-primary/20'
+                    : 'bg-card hover:border-border/80'
+                }`}
+              >
+                <div className="flex w-full justify-between items-start gap-2">
+                  <span className="font-semibold text-sm leading-tight">{s.title}</span>
+                  <span className={`shrink-0 inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold ${
+                    s.difficulty === 'kolay' ? 'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400' :
+                    s.difficulty === 'orta' ? 'bg-yellow-100 text-yellow-700 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400' :
+                    'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400'
+                  }`}>
+                    {s.difficulty.toUpperCase()}
+                  </span>
                 </div>
-                <div className="p-6">
-                  <p className="mb-6 font-medium text-lg leading-relaxed">
-                    {currentScenario.description}
-                  </p>
-                  <div className="rounded-md border p-6 bg-slate-50/50 dark:bg-slate-900/50">
-                    <JournalForm />
-                  </div>
-
-                  {feedback && (
-                    <div
-                      className={`mt-6 p-4 rounded-md border flex items-start gap-3 ${
-                        feedback.isCorrect
-                          ? "bg-green-50 border-green-200 text-green-900 dark:bg-green-900/20 dark:border-green-900 dark:text-green-300"
-                          : "bg-red-50 border-red-200 text-red-900 dark:bg-red-900/20 dark:border-red-900 dark:text-red-300"
-                      }`}
-                    >
-                      {feedback.isCorrect
-                        ? <CheckCircle className="h-5 w-5 mt-0.5" />
-                        : <XCircle className="h-5 w-5 mt-0.5" />}
-                      <div>
-                        <h4 className="font-semibold">
-                          {feedback.isCorrect ? "Başarılı!" : "Hata!"}
-                        </h4>
-                        <p className="text-sm">{feedback.message}</p>
-                      </div>
-                    </div>
-                  )}
-                </div>
-                <div className="flex items-center justify-end p-6 border-t bg-muted/40">
-                  <button
-                    onClick={validateEntries}
-                    className="flex items-center gap-2 rounded-md bg-primary text-primary-foreground px-6 py-2.5 text-sm font-medium hover:bg-primary/90 shadow transition-colors"
-                  >
-                    <Save className="h-4 w-4" />
-                    Kaydet ve Kontrol Et
-                  </button>
-                </div>
-              </>
-            )
-            : (
-              <div className="p-12 text-center text-muted-foreground">
-                Senaryolar yükleniyor...
+                <span className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">{s.description}</span>
+              </button>
+            ))}
+            {scenarios.length === 0 && (
+              <div className="text-center text-sm text-muted-foreground p-4">
+                Senaryo bulunamadı.
               </div>
             )}
-        </div>
-      </main>
+          </div>
+        </aside>
+
+        {/* Right Main Content */}
+        <main className="flex-1 overflow-y-auto p-8 bg-slate-50/30 dark:bg-slate-950/30">
+          <div className="mx-auto max-w-4xl rounded-xl border bg-card text-card-foreground shadow-sm overflow-hidden">
+            {currentScenario
+              ? (
+                <>
+                  <div className="flex flex-col space-y-1.5 p-6 border-b bg-card">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-semibold leading-none tracking-tight text-lg">
+                        {currentScenario.title}
+                      </h3>
+                      <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${
+                        currentScenario.difficulty === 'kolay' ? 'bg-green-100 text-green-700 border-green-200 dark:bg-green-900/30 dark:text-green-400' :
+                        currentScenario.difficulty === 'orta' ? 'bg-yellow-100 text-yellow-700 border-yellow-200 dark:bg-yellow-900/30 dark:text-yellow-400' :
+                        'bg-red-100 text-red-700 border-red-200 dark:bg-red-900/30 dark:text-red-400'
+                      }`}>
+                        {currentScenario.difficulty.toUpperCase()}
+                      </span>
+                    </div>
+                    <p className="text-sm text-muted-foreground pt-2">
+                      İlgili hesap ve ekonomik kodları kullanarak yevmiye kaydını oluşturun.
+                    </p>
+                  </div>
+                  <div className="p-6">
+                    <div className="mb-6 rounded-lg bg-blue-50/50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/30 p-4">
+                      <p className="font-medium text-[15px] leading-relaxed text-blue-900 dark:text-blue-200">
+                        {currentScenario.description}
+                      </p>
+                    </div>
+                    
+                    <div className="rounded-lg border bg-background shadow-sm">
+                      <div className="p-1">
+                        <JournalForm />
+                      </div>
+                    </div>
+
+                    {feedback && (
+                      <div
+                        className={`mt-6 p-4 rounded-lg border flex items-start gap-3 shadow-sm ${
+                          feedback.isCorrect
+                            ? "bg-green-50 border-green-200 text-green-900 dark:bg-green-900/20 dark:border-green-900/50 dark:text-green-300"
+                            : "bg-red-50 border-red-200 text-red-900 dark:bg-red-900/20 dark:border-red-900/50 dark:text-red-300"
+                        }`}
+                      >
+                        {feedback.isCorrect
+                          ? <CheckCircle className="h-5 w-5 mt-0.5 shrink-0" />
+                          : <XCircle className="h-5 w-5 mt-0.5 shrink-0" />}
+                        <div>
+                          <h4 className="font-semibold text-sm">
+                            {feedback.isCorrect ? "Kayıt Başarılı!" : "Kayıt Hatalı!"}
+                          </h4>
+                          <p className="text-sm mt-1 opacity-90">{feedback.message}</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex items-center justify-end p-5 border-t bg-muted/20">
+                    <button
+                      onClick={validateEntries}
+                      className="flex items-center gap-2 rounded-md bg-primary text-primary-foreground px-6 py-2.5 text-sm font-semibold hover:bg-primary/90 shadow transition-all active:scale-[0.98]"
+                    >
+                      <Save className="h-4 w-4" />
+                      Kaydet ve Kontrol Et
+                    </button>
+                  </div>
+                </>
+              )
+              : (
+                <div className="p-20 text-center flex flex-col items-center justify-center space-y-3">
+                  <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+                  <p className="text-muted-foreground font-medium">Senaryolar yükleniyor...</p>
+                </div>
+              )}
+          </div>
+        </main>
+      </div>
     </div>
   );
 }

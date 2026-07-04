@@ -114,9 +114,15 @@ export function JournalForm() {
         <option value="120">120 - Alıcılar Hesabı</option>
         <option value="140">140 - Kişilerden Alacaklar Hesabı</option>
         <option value="150">150 - İlk Madde ve Malzemeler Hesabı</option>
+        <option value="162">162 - Bütçe Dışı Avans ve Krediler</option>
         <option value="253">253 - Tesis, Makine ve Cihazlar Hesabı</option>
+        <option value="258">258 - Yapılmakta Olan Yatırımlar</option>
         <option value="320">320 - Bütçe Emanetleri Hesabı</option>
+        <option value="330">330 - Alınan Depozito ve Teminatlar</option>
+        <option value="332">332 - İcra Kesintileri vb. Emanetler</option>
         <option value="333">333 - Emanetler Hesabı</option>
+        <option value="360">360 - Ödenecek Vergi ve Fonlar (KDV, Damga, Gelir Vergisi)</option>
+        <option value="361">361 - Ödenecek Sosyal Güvenlik Kesintileri</option>
         <option value="600">600 - Gelirler Hesabı</option>
         <option value="630">630 - Giderler Hesabı</option>
         <option value="800">800 - Bütçe Gelirleri Hesabı</option>
