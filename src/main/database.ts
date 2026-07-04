@@ -63,83 +63,104 @@ function seedData(): void {
   const insertEntry = db.prepare('INSERT INTO expected_entries (scenario_id, account_code, economic_code, type, amount) VALUES (?, ?, ?, ?, ?)')
 
   const transaction = db.transaction(() => {
-    
-    // --- KOLAY SENARYOLAR ---
+    // We will generate 100 scenarios based on 6 base templates
+    for (let i = 1; i <= 100; i++) {
+      const templateIndex = i % 6
+      const multiplier = 1 + (i % 5) * 0.5 // Varied amounts
 
-    // Scenario 1: Personel İş Avansı
-    const result1 = insertScenario.run(
-      'Personel İş Avansı',
-      'Kurum personeline kurum hizmetlerinde kullanılmak üzere 5.000 TL nakit iş avansı verilmiştir.',
-      'kolay'
-    )
-    const s1_id = result1.lastInsertRowid
-    insertEntry.run(s1_id, '162', '', 'borc', 5000)
-    insertEntry.run(s1_id, '100', '', 'alacak', 5000)
+      if (templateIndex === 1) {
+        // Personel İş Avansı
+        const amount = 5000 * multiplier
+        const result = insertScenario.run(
+          `Personel İş Avansı (Senaryo ${i})`,
+          `Kurum personeline kurum hizmetlerinde kullanılmak üzere ${amount.toLocaleString('tr-TR')} TL nakit iş avansı verilmiştir.`,
+          'kolay'
+        )
+        const s_id = result.lastInsertRowid
+        insertEntry.run(s_id, '162', '', 'borc', amount)
+        insertEntry.run(s_id, '100', '', 'alacak', amount)
 
+      } else if (templateIndex === 2) {
+        // Vezne Tahsilatı (Peşin Vergi)
+        const amount = 10000 * multiplier
+        const result = insertScenario.run(
+          `Vezne Tahsilatı - Peşin Vergi (Senaryo ${i})`,
+          `Vezneye ${amount.toLocaleString('tr-TR')} TL nakit vergi tahsilatı yapılmıştır. Tahakkuk ve tahsilat aynı anda gerçekleşmiştir. (Bütçe hesapları dahil hem mali hem bütçe kaydını yapınız)\n\n💡 İpucu: Gelir ve Bütçe Geliri hesapları için "01.1.2.01" ekonomik kodunu kullanabilirsiniz.`,
+          'orta'
+        )
+        const s_id = result.lastInsertRowid
+        insertEntry.run(s_id, '100', '', 'borc', amount)
+        insertEntry.run(s_id, '600', '01.1.2.01', 'alacak', amount)
+        insertEntry.run(s_id, '805', '', 'borc', amount)
+        insertEntry.run(s_id, '800', '01.1.2.01', 'alacak', amount)
 
-    // --- ORTA SENARYOLAR ---
+      } else if (templateIndex === 3) {
+        // Doğrudan Temin Mal Alımı
+        const total = 12000 * multiplier
+        const kdv = 1000 * multiplier
+        const net = total - kdv
+        const result = insertScenario.run(
+          `Doğrudan Temin Kırtasiye Alımı (Senaryo ${i})`,
+          `Doğrudan temin usulüyle kırtasiye malzemesi (İlk Madde ve Malzeme) alınmış ve KDV dahil toplam ${total.toLocaleString('tr-TR')} TL fatura kesilmiştir. KDV tevkifatı yapılarak ${kdv.toLocaleString('tr-TR')} TL KDV vergi dairesine ödenecekler (360) arasına alınmış, kalan net tutar esnafa ödenmek üzere Bütçe Emanetlerine (320) aktarılmıştır.\n\n💡 İpucu: İlk Madde ve Malzeme hesabı için "03.2.1.01" ekonomik kodunu kullanabilirsiniz.`,
+          'orta'
+        )
+        const s_id = result.lastInsertRowid
+        insertEntry.run(s_id, '150', '03.2.1.01', 'borc', total)
+        insertEntry.run(s_id, '360', '', 'alacak', kdv)
+        insertEntry.run(s_id, '320', '', 'alacak', net)
 
-    // Scenario 2: Vezne Tahsilatı (Peşin Vergi)
-    const result2 = insertScenario.run(
-      'Vezne Tahsilatı (Peşin Vergi)',
-      'Vezneye 10.000 TL nakit vergi tahsilatı yapılmıştır. Tahakkuk ve tahsilat aynı anda gerçekleşmiştir. (Bütçe hesapları dahil hem mali hem bütçe kaydını yapınız)\n\n💡 İpucu: Gelir ve Bütçe Geliri hesapları için "01.1.2.01" ekonomik kodunu kullanabilirsiniz.',
-      'orta'
-    )
-    const s2_id = result2.lastInsertRowid
-    insertEntry.run(s2_id, '100', '', 'borc', 10000)
-    insertEntry.run(s2_id, '600', '01.1.2.01', 'alacak', 10000)
-    insertEntry.run(s2_id, '805', '', 'borc', 10000)
-    insertEntry.run(s2_id, '800', '01.1.2.01', 'alacak', 10000)
+      } else if (templateIndex === 4) {
+        // İş Avansının Kapatılması (Mahsup)
+        const avans = 5000 * multiplier
+        const harcama = 4000 * multiplier
+        const iade = avans - harcama
+        const result = insertScenario.run(
+          `İş Avansının Kapatılması (Senaryo ${i})`,
+          `Personele verilen ${avans.toLocaleString('tr-TR')} TL avansın ${harcama.toLocaleString('tr-TR')} TL'si ile kırtasiye malzemesi (İlk Madde ve Malzeme) alınmış, kalan ${iade.toLocaleString('tr-TR')} TL nakit olarak vezneye iade edilmiştir. (Avans Kapatma İşlemi - Bütçe hesapları hariç).\n\n💡 İpucu: İlk Madde ve Malzeme hesabı için "03.2.1.01" kodunu kullanabilirsiniz.`,
+          'orta'
+        )
+        const s_id = result.lastInsertRowid
+        insertEntry.run(s_id, '150', '03.2.1.01', 'borc', harcama)
+        insertEntry.run(s_id, '100', '', 'borc', iade)
+        insertEntry.run(s_id, '162', '', 'alacak', avans)
 
-    // Scenario 3: Doğrudan Temin Mal Alımı
-    const result3 = insertScenario.run(
-      'Doğrudan Temin Kırtasiye Alımı (KDV Tevkifatı)',
-      'Doğrudan temin usulüyle kırtasiye malzemesi (İlk Madde ve Malzeme) alınmış ve KDV dahil toplam 12.000 TL fatura kesilmiştir. KDV tevkifatı yapılarak 1.000 TL KDV vergi dairesine ödenecekler (360) arasına alınmış, kalan net tutar esnafa ödenmek üzere Bütçe Emanetlerine (320) aktarılmıştır.\n\n💡 İpucu: İlk Madde ve Malzeme hesabı için "03.2.1.01" ekonomik kodunu kullanabilirsiniz.',
-      'orta'
-    )
-    const s3_id = result3.lastInsertRowid
-    insertEntry.run(s3_id, '150', '03.2.1.01', 'borc', 12000)
-    insertEntry.run(s3_id, '360', '', 'alacak', 1000)
-    insertEntry.run(s3_id, '320', '', 'alacak', 11000)
+      } else if (templateIndex === 5) {
+        // Maaş Ödemesi
+        const brut = 100000 * multiplier
+        const sgk = 14000 * multiplier
+        const vergi = 15000 * multiplier
+        const icra = 1000 * multiplier
+        const net = brut - sgk - vergi - icra
+        const result = insertScenario.run(
+          `Maaş Ödemesi Tahakkuku (Senaryo ${i})`,
+          `Kurum personeline ${brut.toLocaleString('tr-TR')} TL brüt maaş tahakkuk ettirilmiştir. Kanunlar gereği kesintiler: ${sgk.toLocaleString('tr-TR')} TL SGK Primi (361), ${vergi.toLocaleString('tr-TR')} TL Gelir ve Damga Vergisi (360), ${icra.toLocaleString('tr-TR')} TL İcra/Nafaka kesintisi (332). Kalan net tutar banka aracılığıyla personele ödenmek üzere talimatlandırılmıştır (103).\n\n💡 İpucu: Gider Hesabı (630) için "01.1.1.01" (Temel Maaşlar) ekonomik kodunu kullanınız.`,
+          'zor'
+        )
+        const s_id = result.lastInsertRowid
+        insertEntry.run(s_id, '630', '01.1.1.01', 'borc', brut)
+        insertEntry.run(s_id, '361', '', 'alacak', sgk)
+        insertEntry.run(s_id, '360', '', 'alacak', vergi)
+        insertEntry.run(s_id, '332', '', 'alacak', icra)
+        insertEntry.run(s_id, '103', '', 'alacak', net)
 
-    // Scenario 4: İş Avansının Kapatılması (Mahsup)
-    const result4 = insertScenario.run(
-      'İş Avansının Kapatılması (Mahsup)',
-      'Personele verilen 5.000 TL avansın 4.000 TL\'si ile kırtasiye malzemesi (İlk Madde ve Malzeme) alınmış, kalan 1.000 TL nakit olarak vezneye iade edilmiştir. (Avans Kapatma İşlemi - Bütçe hesapları hariç).\n\n💡 İpucu: İlk Madde ve Malzeme hesabı için "03.2.1.01" kodunu kullanabilirsiniz.',
-      'orta'
-    )
-    const s4_id = result4.lastInsertRowid
-    insertEntry.run(s4_id, '150', '03.2.1.01', 'borc', 4000)
-    insertEntry.run(s4_id, '100', '', 'borc', 1000)
-    insertEntry.run(s4_id, '162', '', 'alacak', 5000)
-
-
-    // --- ZOR SENARYOLAR ---
-
-    // Scenario 5: Maaş Ödemesi
-    const result5 = insertScenario.run(
-      'Maaş Ödemesi Tahakkuku ve Kesintiler',
-      'Kurum personeline 100.000 TL brüt maaş tahakkuk ettirilmiştir. Kanunlar gereği kesintiler: 14.000 TL SGK Primi (361), 15.000 TL Gelir ve Damga Vergisi (360), 1.000 TL İcra/Nafaka kesintisi (332). Kalan net tutar banka aracılığıyla personele ödenmek üzere talimatlandırılmıştır (103).\n\n💡 İpucu: Gider Hesabı (630) için "01.1.1.01" (Temel Maaşlar) ekonomik kodunu kullanınız.',
-      'zor'
-    )
-    const s5_id = result5.lastInsertRowid
-    insertEntry.run(s5_id, '630', '01.1.1.01', 'borc', 100000)
-    insertEntry.run(s5_id, '361', '', 'alacak', 14000)
-    insertEntry.run(s5_id, '360', '', 'alacak', 15000)
-    insertEntry.run(s5_id, '332', '', 'alacak', 1000)
-    insertEntry.run(s5_id, '103', '', 'alacak', 70000)
-
-    // Scenario 6: Müteahhit Hakedişi
-    const result6 = insertScenario.run(
-      'Müteahhit Hakedişi (Fen İşleri)',
-      'Fen İşleri tarafından yaptırılan bir yatırım (yapım) işi için müteahhide 200.000 TL hakediş düzenlenmiştir. Kamu İhale Kanunu gereği %6 Kesin Teminat (12.000 TL) ve sözleşme gereği Damga Vergisi (2.000 TL) kesilmiştir. Kalan tutar müteahhide ödenmek üzere Bütçe Emanetine alınmıştır.\n\n💡 İpucu: Tesis, Makine ve Cihazlar Hesabı (258) için "06.5.7.90" ekonomik kodunu kullanınız.',
-      'zor'
-    )
-    const s6_id = result6.lastInsertRowid
-    insertEntry.run(s6_id, '258', '06.5.7.90', 'borc', 200000)
-    insertEntry.run(s6_id, '330', '', 'alacak', 12000)
-    insertEntry.run(s6_id, '360', '', 'alacak', 2000)
-    insertEntry.run(s6_id, '320', '', 'alacak', 186000)
+      } else {
+        // Müteahhit Hakedişi
+        const hakedis = 200000 * multiplier
+        const teminat = 12000 * multiplier
+        const vergi = 2000 * multiplier
+        const net = hakedis - teminat - vergi
+        const result = insertScenario.run(
+          `Müteahhit Hakedişi - Fen İşleri (Senaryo ${i})`,
+          `Fen İşleri tarafından yaptırılan bir yatırım (yapım) işi için müteahhide ${hakedis.toLocaleString('tr-TR')} TL hakediş düzenlenmiştir. Kamu İhale Kanunu gereği %6 Kesin Teminat (${teminat.toLocaleString('tr-TR')} TL) ve sözleşme gereği Damga Vergisi (${vergi.toLocaleString('tr-TR')} TL) kesilmiştir. Kalan tutar müteahhide ödenmek üzere Bütçe Emanetine alınmıştır.\n\n💡 İpucu: Tesis, Makine ve Cihazlar Hesabı (258) için "06.5.7.90" ekonomik kodunu kullanınız.`,
+          'zor'
+        )
+        const s_id = result.lastInsertRowid
+        insertEntry.run(s_id, '258', '06.5.7.90', 'borc', hakedis)
+        insertEntry.run(s_id, '330', '', 'alacak', teminat)
+        insertEntry.run(s_id, '360', '', 'alacak', vergi)
+        insertEntry.run(s_id, '320', '', 'alacak', net)
+      }
+    }
   })
 
   transaction()
