@@ -8,7 +8,7 @@ const dbDir = path.join(app.getPath('userData'), 'database')
 if (!fs.existsSync(dbDir)) {
   fs.mkdirSync(dbDir, { recursive: true })
 }
-const dbPath = path.join(dbDir, 'accounting.db')
+const dbPath = path.join(dbDir, 'accounting_v2.db')
 
 // Initialize DB
 const db = new Database(dbPath, { verbose: console.log })
