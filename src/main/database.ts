@@ -8,7 +8,7 @@ const dbDir = path.join(app.getPath('userData'), 'database')
 if (!fs.existsSync(dbDir)) {
   fs.mkdirSync(dbDir, { recursive: true })
 }
-const dbPath = path.join(dbDir, 'accounting_v2.db')
+const dbPath = path.join(dbDir, 'accounting_v3.db')
 
 // Initialize DB
 const db = new Database(dbPath, { verbose: console.log })
@@ -70,11 +70,11 @@ function seedData(): void {
       'zor'
     )
     const s1_id = result1.lastInsertRowid
-    insertEntry.run(s1_id, '630', '01.1', 'borc', 100000)
-    insertEntry.run(s1_id, '361', '01.1', 'alacak', 14000)
-    insertEntry.run(s1_id, '360', '01.1', 'alacak', 15000)
-    insertEntry.run(s1_id, '332', '01.1', 'alacak', 1000)
-    insertEntry.run(s1_id, '103', '01.1', 'alacak', 70000)
+    insertEntry.run(s1_id, '630', '01.1.1.01', 'borc', 100000)
+    insertEntry.run(s1_id, '361', '', 'alacak', 14000)
+    insertEntry.run(s1_id, '360', '', 'alacak', 15000)
+    insertEntry.run(s1_id, '332', '', 'alacak', 1000)
+    insertEntry.run(s1_id, '103', '', 'alacak', 70000)
 
     // Scenario 2: Müteahhit Hakedişi
     const result2 = insertScenario.run(
@@ -83,10 +83,10 @@ function seedData(): void {
       'zor'
     )
     const s2_id = result2.lastInsertRowid
-    insertEntry.run(s2_id, '258', '06.5', 'borc', 200000)
-    insertEntry.run(s2_id, '330', '01.1', 'alacak', 12000)
-    insertEntry.run(s2_id, '360', '01.1', 'alacak', 2000)
-    insertEntry.run(s2_id, '320', '01.1', 'alacak', 186000)
+    insertEntry.run(s2_id, '258', '06.5.7.90', 'borc', 200000)
+    insertEntry.run(s2_id, '330', '', 'alacak', 12000)
+    insertEntry.run(s2_id, '360', '', 'alacak', 2000)
+    insertEntry.run(s2_id, '320', '', 'alacak', 186000)
 
     // Scenario 3: Doğrudan Temin Mal Alımı
     const result3 = insertScenario.run(
@@ -95,9 +95,9 @@ function seedData(): void {
       'orta'
     )
     const s3_id = result3.lastInsertRowid
-    insertEntry.run(s3_id, '150', '03.2', 'borc', 12000)
-    insertEntry.run(s3_id, '360', '01.1', 'alacak', 1000)
-    insertEntry.run(s3_id, '320', '01.1', 'alacak', 11000)
+    insertEntry.run(s3_id, '150', '03.2.1.01', 'borc', 12000)
+    insertEntry.run(s3_id, '360', '', 'alacak', 1000)
+    insertEntry.run(s3_id, '320', '', 'alacak', 11000)
 
     // Scenario 4: Vezne Tahsilatı (Peşin Vergi)
     const result4 = insertScenario.run(
@@ -106,9 +106,9 @@ function seedData(): void {
       'orta'
     )
     const s4_id = result4.lastInsertRowid
-    insertEntry.run(s4_id, '100', '01.1', 'borc', 10000)
+    insertEntry.run(s4_id, '100', '', 'borc', 10000)
     insertEntry.run(s4_id, '600', '01.1.2.01', 'alacak', 10000)
-    insertEntry.run(s4_id, '805', '01.1', 'borc', 10000)
+    insertEntry.run(s4_id, '805', '', 'borc', 10000)
     insertEntry.run(s4_id, '800', '01.1.2.01', 'alacak', 10000)
 
     // Scenario 5: Personel İş Avansı
@@ -118,8 +118,8 @@ function seedData(): void {
       'kolay'
     )
     const s5_id = result5.lastInsertRowid
-    insertEntry.run(s5_id, '162', '01.1', 'borc', 5000)
-    insertEntry.run(s5_id, '103', '01.1', 'alacak', 5000)
+    insertEntry.run(s5_id, '162', '', 'borc', 5000)
+    insertEntry.run(s5_id, '100', '', 'alacak', 5000)
 
     // Scenario 6: İş Avansının Kapatılması (Mahsup)
     const result6 = insertScenario.run(
@@ -128,9 +128,9 @@ function seedData(): void {
       'orta'
     )
     const s6_id = result6.lastInsertRowid
-    insertEntry.run(s6_id, '150', '03.2', 'borc', 4000)
-    insertEntry.run(s6_id, '100', '01.1', 'borc', 1000)
-    insertEntry.run(s6_id, '162', '01.1', 'alacak', 5000)
+    insertEntry.run(s6_id, '150', '03.2.1.01', 'borc', 4000)
+    insertEntry.run(s6_id, '100', '', 'borc', 1000)
+    insertEntry.run(s6_id, '162', '', 'alacak', 5000)
   })
 
   transaction()
